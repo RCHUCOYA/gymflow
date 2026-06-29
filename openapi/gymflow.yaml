@@ -726,26 +726,265 @@ paths:
   /dashboard/summary:
     get:
       tags: [Dashboard]
-      summary: Resumen administrativo
-      description: Requiere rol Administrador.
+      summary: Resumen ejecutivo de KPIs (solo Administrador)
       parameters:
         - name: from
           in: query
           schema:
             type: string
-            format: date
+            format: date-time
         - name: to
           in: query
           schema:
             type: string
-            format: date
+            format: date-time
       responses:
         '200':
-          description: KPIs del dashboard
+          description: KPIs, rankings y metricas del periodo
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /admin/products:
+    get:
+      tags: [Admin]
+      summary: Listar todos los productos (Admin)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Productos paginados con estado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Admin]
+      summary: Crear producto (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Producto creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /admin/products/{productId}:
+    patch:
+      tags: [Admin]
+      summary: Actualizar producto (Admin)
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '200':
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/products/{productId}/status:
+    patch:
+      tags: [Admin]
+      summary: Activar o inactivar producto (Admin — inactivacion logica)
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Estado cambiado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/membership-plans:
+    get:
+      tags: [Admin]
+      summary: Listar todos los planes de membresia (Admin)
+      responses:
+        '200':
+          description: Planes con estado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    post:
+      tags: [Admin]
+      summary: Crear plan de membresia (Admin — RN-013)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMembershipPlanRequest'
+      responses:
+        '201':
+          description: Plan creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/membership-plans/{planId}/status:
+    patch:
+      tags: [Admin]
+      summary: Activar o inactivar plan (Admin)
+      parameters:
+        - $ref: '#/components/parameters/PlanId'
+      responses:
+        '200':
+          description: Estado cambiado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/rooms:
+    get:
+      tags: [Admin]
+      summary: Listar todas las salas (Admin)
+      responses:
+        '200':
+          description: Salas con conteo de horarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    post:
+      tags: [Admin]
+      summary: Crear sala (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoomRequest'
+      responses:
+        '201':
+          description: Sala creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/rooms/{roomId}/status:
+    patch:
+      tags: [Admin]
+      summary: Activar o inactivar sala (Admin)
+      parameters:
+        - $ref: '#/components/parameters/RoomId'
+      responses:
+        '200':
+          description: Estado cambiado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/rooms/{roomId}/schedules:
+    post:
+      tags: [Admin]
+      summary: Crear horario para sala (Admin)
+      parameters:
+        - $ref: '#/components/parameters/RoomId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduleRequest'
+      responses:
+        '201':
+          description: Horario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/promotions:
+    get:
+      tags: [Admin]
+      summary: Listar promociones (Admin)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Promociones paginadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    post:
+      tags: [Admin]
+      summary: Crear promocion (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePromotionRequest'
+      responses:
+        '201':
+          description: Promocion creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/promotions/{promotionId}/status:
+    patch:
+      tags: [Admin]
+      summary: Activar o inactivar promocion (Admin)
+      parameters:
+        - $ref: '#/components/parameters/PromotionId'
+      responses:
+        '200':
+          description: Estado cambiado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: Listar registros de auditoria (Admin — RN-027)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: entity
+          in: query
+          schema:
+            type: string
+            example: Product
+      responses:
+        '200':
+          description: Registros de auditoria paginados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 components:
   securitySchemes:
     bearerAuth:
@@ -810,6 +1049,27 @@ components:
         format: uuid
     CartItemId:
       name: cartItemId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PlanId:
+      name: planId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PromotionId:
+      name: promotionId
       in: path
       required: true
       schema:
@@ -1389,3 +1649,95 @@ components:
           type: string
           minLength: 1
           maxLength: 5000
+    CreateProductRequest:
+      type: object
+      required: [name, price, stock, categoryId]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 140
+        description:
+          type: string
+        price:
+          type: number
+          minimum: 0.01
+        stock:
+          type: integer
+          minimum: 0
+        categoryId:
+          type: string
+          format: uuid
+        imageUrl:
+          type: string
+          format: uri
+    CreateMembershipPlanRequest:
+      type: object
+      required: [name, durationDays, price, benefits]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 80
+        durationDays:
+          type: integer
+          minimum: 1
+        price:
+          type: number
+          minimum: 0.01
+        benefits:
+          type: object
+          additionalProperties: true
+    CreateRoomRequest:
+      type: object
+      required: [name, capacity]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        capacity:
+          type: integer
+          minimum: 1
+    CreateScheduleRequest:
+      type: object
+      required: [startsAt, endsAt, quota]
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        quota:
+          type: integer
+          minimum: 1
+    CreatePromotionRequest:
+      type: object
+      required: [name, discountPercent, targetType, startsAt, endsAt]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        description:
+          type: string
+        discountPercent:
+          type: number
+          minimum: 0.01
+          maximum: 100
+        targetType:
+          type: string
+          enum: [product, membership_plan]
+        productId:
+          type: string
+          format: uuid
+        membershipPlanId:
+          type: string
+          format: uuid
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time

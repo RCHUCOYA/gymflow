@@ -1,0 +1,29 @@
+meta {
+  name: Create Product
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/admin/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Proteina Nuevo",
+    "description": "Proteina de suero de leche",
+    "price": 89.99,
+    "stock": 50,
+    "categoryId": "{{categoryId}}"
+  }
+}

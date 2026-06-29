@@ -331,6 +331,8 @@ Una funcionalidad se considera terminada cuando cumple:
 
 ## Fase 8. Administracion, promociones y auditoria
 
+**Estado:** completada.
+
 **Objetivo:** entregar panel administrativo operativo.
 
 **Duracion sugerida:** 1 sprint.
@@ -366,6 +368,8 @@ Una funcionalidad se considera terminada cuando cumple:
 - Los permisos de `docs/21-estandares-arquitectura-calidad.md` se respetan.
 
 ## Fase 9. Dashboard y reportes
+
+**Estado:** completada.
 
 **Objetivo:** visualizar indicadores del negocio.
 

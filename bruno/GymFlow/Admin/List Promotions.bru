@@ -1,0 +1,15 @@
+meta {
+  name: List Promotions Admin
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/admin/promotions
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

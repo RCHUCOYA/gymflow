@@ -1,0 +1,30 @@
+meta {
+  name: Create Promotion
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/admin/promotions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "10% en Whey Protein",
+    "discountPercent": 10,
+    "targetType": "product",
+    "productId": "{{productId}}",
+    "startsAt": "2026-07-01T00:00:00-05:00",
+    "endsAt": "2026-07-31T23:59:59-05:00"
+  }
+}

@@ -1,5 +1,7 @@
 import { Router } from "express";
+import { adminRouter } from "../modules/admin/admin.routes.js";
 import { authRouter } from "../modules/auth/auth.routes.js";
+import { dashboardRouter } from "../modules/dashboard/dashboard.routes.js";
 import { membershipsRouter } from "../modules/memberships/memberships.routes.js";
 import { professionalsRouter } from "../modules/professionals/professionals.routes.js";
 import { reservationsRouter } from "../modules/reservations/reservations.routes.js";
@@ -18,3 +20,5 @@ apiRouter.use(roomsRouter);
 apiRouter.use(reservationsRouter);
 apiRouter.use(professionalsRouter);
 apiRouter.use(storeRouter);
+apiRouter.use(adminRouter);
+apiRouter.use(dashboardRouter);
