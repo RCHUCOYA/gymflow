@@ -101,16 +101,47 @@ Las fases de autenticacion, RBAC y modulos funcionales continuan segun [docs/16-
 
 La guia completa esta en [docs/19-guia-instalacion-despliegue.md](docs/19-guia-instalacion-despliegue.md).
 
-### Desarrollo local futuro
+### Desarrollo local
 
-1. Instalar dependencias con `npm install`.
-2. Configurar variables de entorno a partir de `.env.example`, `apps/api/.env.example` y `apps/web/.env.example`.
-3. Levantar backend con `npm run dev:api`.
-4. Levantar frontend con `npm run dev:web`.
-5. Configurar `DATABASE_URL` en `apps/api/.env` o en el entorno.
-6. Generar Prisma Client con `npm run db:generate -w @gymflow/api`.
-7. Aplicar migracion inicial y seed con `npm run db:reset:seed -w @gymflow/api`.
-8. Configurar Cloudinary antes de implementar carga de imagenes.
+```bash
+# 1. Instalar dependencias
+npm install
+
+# 2. Configurar variables de entorno
+cp apps/api/.env.example apps/api/.env       # Completar DATABASE_URL y JWT secrets
+cp apps/web/.env.example apps/web/.env.local  # Completar NEXT_PUBLIC_API_URL
+
+# 3. Migrar y poblar base de datos
+npm run db:generate -w @gymflow/api
+npm run db:migrate:dev -w @gymflow/api
+npm run db:seed -w @gymflow/api
+
+# 4. Levantar en desarrollo
+npm run dev:api   # Puerto 4000
+npm run dev:web   # Puerto 3000
+
+# 5. Ejecutar pruebas
+npm run test:api
+```
+
+### Usuarios demo
+
+| Email | Rol | Password |
+| --- | --- | --- |
+| `admin@gymflow.dev` | Administrador | `Password123` |
+| `recepcion@gymflow.dev` | Recepcionista | `Password123` |
+| `cliente@gymflow.dev` | Cliente | `Password123` |
+| `trainer@gymflow.dev` | Entrenador | `Password123` |
+| `nutri@gymflow.dev` | Nutricionista | `Password123` |
+
+### Despliegue en produccion
+
+| Servicio | Plataforma | Archivo de config |
+| --- | --- | --- |
+| Frontend | Vercel | `vercel.json` |
+| Backend | Render | `render.yaml` |
+| Base de datos | Neon | Migracion Prisma |
+| Imagenes | Cloudinary | Variables de entorno |
 
 ### Variables previstas
 

@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build -w @gymflow/web",
+  "outputDirectory": "apps/web/.next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- apps/web/ packages/",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@gymflow_api_url",
+    "NEXT_PUBLIC_APP_NAME": "GymFlow",
+    "NEXT_PUBLIC_SITE_URL": "@gymflow_site_url"
+  }
+}
