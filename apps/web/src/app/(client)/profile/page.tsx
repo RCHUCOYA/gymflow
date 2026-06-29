@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/providers/auth-provider";
+import { getMyMembership } from "@/services/memberships-service";
 
 export default function ProfilePage() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, accessToken, logout } = useAuth();
+
+  const membershipQuery = useQuery({
+    queryKey: ["my-membership", user?.id],
+    queryFn: () => getMyMembership(accessToken ?? ""),
+    enabled: Boolean(accessToken && user?.role === "Cliente")
+  });
 
   if (!isAuthenticated || !user) {
     return (
@@ -49,6 +57,23 @@ export default function ProfilePage() {
             <dd className="mt-1 text-sm font-medium">{user.role}</dd>
           </div>
         </dl>
+
+        {user.role === "Cliente" ? (
+          <div className="mt-8 rounded-md border bg-muted/30 p-4">
+            <h2 className="text-sm font-semibold">Membresia actual</h2>
+            {membershipQuery.isLoading ? (
+              <p className="mt-2 text-xs text-muted-foreground">Cargando membresia...</p>
+            ) : null}
+            {membershipQuery.data ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {membershipQuery.data.membershipPlan.name} ({membershipQuery.data.status}) - vence {new Date(membershipQuery.data.endsAt).toLocaleDateString("es-PE")}
+              </p>
+            ) : null}
+            {!membershipQuery.isLoading && !membershipQuery.data ? (
+              <p className="mt-2 text-xs text-muted-foreground">No tienes membresia activa.</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <button
           type="button"

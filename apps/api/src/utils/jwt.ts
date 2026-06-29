@@ -9,15 +9,13 @@ const REFRESH_EXPIRES_IN =
 
 export function signAccessToken(payload: AuthTokenPayload) {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-    expiresIn: ACCESS_EXPIRES_IN,
-    subject: payload.sub
+    expiresIn: ACCESS_EXPIRES_IN
   });
 }
 
 export function signRefreshToken(payload: AuthTokenPayload) {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-    expiresIn: REFRESH_EXPIRES_IN,
-    subject: payload.sub
+    expiresIn: REFRESH_EXPIRES_IN
   });
 }
 

@@ -6,27 +6,51 @@ import { createApp } from "../../app.js";
 
 const app = createApp();
 
-test("login correcto e incorrecto", async () => {
+type AuthTokens = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+type AuthResponseBody = {
+  success: boolean;
+  data: AuthTokens;
+};
+
+type ErrorResponseBody = {
+  success: boolean;
+  error: {
+    code: string;
+    message: string;
+  };
+};
+
+function bodyOf<T>(response: request.Response) {
+  return response.body as T;
+}
+
+void test("login correcto e incorrecto", async () => {
   const okResponse = await request(app).post("/api/v1/auth/login").send({
     email: "cliente@gymflow.dev",
     password: "Password123"
   });
+  const okBody = bodyOf<AuthResponseBody>(okResponse);
 
   assert.equal(okResponse.status, 200);
-  assert.equal(okResponse.body.success, true);
-  assert.equal(typeof okResponse.body.data.accessToken, "string");
-  assert.equal(typeof okResponse.body.data.refreshToken, "string");
+  assert.equal(okBody.success, true);
+  assert.equal(typeof okBody.data.accessToken, "string");
+  assert.equal(typeof okBody.data.refreshToken, "string");
 
   const badResponse = await request(app).post("/api/v1/auth/login").send({
     email: "cliente@gymflow.dev",
     password: "invalid-password"
   });
+  const badBody = bodyOf<ErrorResponseBody>(badResponse);
 
   assert.equal(badResponse.status, 401);
-  assert.equal(badResponse.body.success, false);
+  assert.equal(badBody.success, false);
 });
 
-test("todos los roles demo pueden iniciar sesion", async () => {
+void test("todos los roles demo pueden iniciar sesion", async () => {
   const emails = [
     "admin@gymflow.dev",
     "recepcion@gymflow.dev",
@@ -40,45 +64,50 @@ test("todos los roles demo pueden iniciar sesion", async () => {
       email,
       password: "Password123"
     });
+    const body = bodyOf<AuthResponseBody>(response);
 
     assert.equal(response.status, 200);
-    assert.equal(response.body.success, true);
+    assert.equal(body.success, true);
   }
 });
 
-test("token ausente bloquea perfil", async () => {
+void test("token ausente bloquea perfil", async () => {
   const response = await request(app).get("/api/v1/users/me");
+  const body = bodyOf<ErrorResponseBody>(response);
 
   assert.equal(response.status, 401);
-  assert.equal(response.body.success, false);
+  assert.equal(body.success, false);
 });
 
-test("token invalido bloquea perfil", async () => {
+void test("token invalido bloquea perfil", async () => {
   const response = await request(app)
     .get("/api/v1/users/me")
     .set("authorization", "Bearer invalid-token");
+  const body = bodyOf<ErrorResponseBody>(response);
 
   assert.equal(response.status, 401);
-  assert.equal(response.body.success, false);
+  assert.equal(body.success, false);
 });
 
-test("cliente no puede acceder a endpoint admin", async () => {
+void test("cliente no puede acceder a endpoint admin", async () => {
   const loginResponse = await request(app).post("/api/v1/auth/login").send({
     email: "cliente@gymflow.dev",
     password: "Password123"
   });
+  const loginBody = bodyOf<AuthResponseBody>(loginResponse);
 
-  const token = loginResponse.body.data.accessToken as string;
+  const token = loginBody.data.accessToken;
 
   const response = await request(app)
     .get("/api/v1/users")
     .set("authorization", `Bearer ${token}`);
+  const body = bodyOf<ErrorResponseBody>(response);
 
   assert.equal(response.status, 403);
-  assert.equal(response.body.success, false);
+  assert.equal(body.success, false);
 });
 
-test("cambio de rol solo por administrador", async () => {
+void test("cambio de rol solo por administrador", async () => {
   const [adminLogin, clientLogin, clienteRole, targetUser] = await Promise.all([
     request(app).post("/api/v1/auth/login").send({
       email: "admin@gymflow.dev",
@@ -95,8 +124,8 @@ test("cambio de rol solo por administrador", async () => {
   assert.ok(clienteRole?.id);
   assert.ok(targetUser?.id);
 
-  const clientToken = clientLogin.body.data.accessToken as string;
-  const adminToken = adminLogin.body.data.accessToken as string;
+  const clientToken = bodyOf<AuthResponseBody>(clientLogin).data.accessToken;
+  const adminToken = bodyOf<AuthResponseBody>(adminLogin).data.accessToken;
 
   const forbidden = await request(app)
     .patch(`/api/v1/users/${targetUser?.id}/role`)
@@ -109,19 +138,21 @@ test("cambio de rol solo por administrador", async () => {
     .patch(`/api/v1/users/${targetUser?.id}/role`)
     .set("authorization", `Bearer ${adminToken}`)
     .send({ roleId: clienteRole?.id });
+  const allowedBody = bodyOf<{ success: boolean }>(allowed);
 
   assert.equal(allowed.status, 200);
-  assert.equal(allowed.body.success, true);
+  assert.equal(allowedBody.success, true);
 });
 
-test("refresh token revocado no renueva sesion", async () => {
+void test("refresh token revocado no renueva sesion", async () => {
   const loginResponse = await request(app).post("/api/v1/auth/login").send({
     email: "cliente@gymflow.dev",
     password: "Password123"
   });
+  const loginBody = bodyOf<AuthResponseBody>(loginResponse);
 
-  const accessToken = loginResponse.body.data.accessToken as string;
-  const refreshToken = loginResponse.body.data.refreshToken as string;
+  const accessToken = loginBody.data.accessToken;
+  const refreshToken = loginBody.data.refreshToken;
 
   const logoutResponse = await request(app)
     .post("/api/v1/auth/logout")
@@ -131,7 +162,8 @@ test("refresh token revocado no renueva sesion", async () => {
   assert.equal(logoutResponse.status, 204);
 
   const refreshResponse = await request(app).post("/api/v1/auth/refresh").send({ refreshToken });
+  const refreshBody = bodyOf<ErrorResponseBody>(refreshResponse);
 
   assert.equal(refreshResponse.status, 401);
-  assert.equal(refreshResponse.body.success, false);
+  assert.equal(refreshBody.success, false);
 });
