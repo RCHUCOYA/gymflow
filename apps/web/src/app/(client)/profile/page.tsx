@@ -64,13 +64,28 @@ export default function ProfilePage() {
             {membershipQuery.isLoading ? (
               <p className="mt-2 text-xs text-muted-foreground">Cargando membresia...</p>
             ) : null}
-            {membershipQuery.data ? (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {membershipQuery.data.membershipPlan.name} ({membershipQuery.data.status}) - vence {new Date(membershipQuery.data.endsAt).toLocaleDateString("es-PE")}
+            {membershipQuery.isError ? (
+              <p className="mt-2 text-xs text-destructive">
+                No se pudo cargar el estado de tu membresia.
               </p>
             ) : null}
-            {!membershipQuery.isLoading && !membershipQuery.data ? (
-              <p className="mt-2 text-xs text-muted-foreground">No tienes membresia activa.</p>
+            {membershipQuery.data ? (
+              <div className="mt-2 space-y-2 text-xs text-muted-foreground">
+                <p>
+                  {membershipQuery.data.membershipPlan.name} ({membershipQuery.data.status}) - vence {new Date(membershipQuery.data.endsAt).toLocaleDateString("es-PE")}
+                </p>
+                <Link href="/planes" className="inline-flex text-sm font-semibold text-primary">
+                  Renovar o cambiar plan
+                </Link>
+              </div>
+            ) : null}
+            {!membershipQuery.isLoading && !membershipQuery.isError && !membershipQuery.data ? (
+              <div className="mt-2 space-y-2 text-xs text-muted-foreground">
+                <p>No tienes membresia activa.</p>
+                <Link href="/planes" className="inline-flex text-sm font-semibold text-primary">
+                  Comprar plan
+                </Link>
+              </div>
             ) : null}
           </div>
         ) : null}
