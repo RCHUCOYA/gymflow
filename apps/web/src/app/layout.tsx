@@ -13,8 +13,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gymflow.example.com";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gymflow.example.com"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "GymFlow",
     template: "%s | GymFlow"
@@ -22,11 +24,15 @@ export const metadata: Metadata = {
   description:
     "Plataforma inteligente para gestionar gimnasios, membresias, reservas, tienda, pagos simulados y reportes.",
   applicationName: "GymFlow",
+  keywords: ["gym management", "gestion de gimnasios", "membresias gimnasio", "reservas fitness"],
+  authors: [{ name: "GymFlow" }],
+  creator: "GymFlow",
+  publisher: "GymFlow",
   openGraph: {
     title: "GymFlow",
     description:
       "Gestion integral de gimnasios con membresias, reservas, tienda, pagos simulados y dashboard.",
-    url: "https://gymflow.example.com",
+    url: siteUrl,
     siteName: "GymFlow",
     locale: "es_PE",
     type: "website"
@@ -35,7 +41,44 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GymFlow",
     description:
-      "Gestion integral de gimnasios con membresias, reservas, tienda, pagos simulados y dashboard."
+      "Gestion integral de gimnasios con membresias, reservas, tienda, pagos simulados y dashboard.",
+    creator: "@gymflow"
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1
+    }
+  },
+  alternates: {
+    canonical: siteUrl
+  }
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "GymFlow",
+  url: siteUrl,
+  description:
+    "Plataforma SaaS para la gestion integral de gimnasios modernos.",
+  sameAs: []
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "GymFlow",
+  url: siteUrl,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${siteUrl}/tienda?search={search_term_string}`,
+    "query-input": "required name=search_term_string"
   }
 };
 
@@ -46,6 +89,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+      </head>
       <body className="flex min-h-full flex-col antialiased">
         <AppProviders>{children}</AppProviders>
       </body>

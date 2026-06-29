@@ -409,6 +409,8 @@ Una funcionalidad se considera terminada cuando cumple:
 
 ## Fase 10. SEO, accesibilidad y rendimiento
 
+**Estado:** completada.
+
 **Objetivo:** preparar paginas publicas para presentacion profesional.
 
 **Duracion sugerida:** 1 sprint.
@@ -448,6 +450,8 @@ Una funcionalidad se considera terminada cuando cumple:
 - Best Practices > 95.
 
 ## Fase 11. QA integral y hardening
+
+**Estado:** completada.
 
 **Objetivo:** estabilizar la demo antes de desplegar.
 

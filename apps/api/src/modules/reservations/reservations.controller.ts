@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import { AppError } from "../../utils/app-error.js";
 import { sendSuccess } from "../../utils/api-response.js";
 import { httpStatus } from "../../utils/http-status.js";
+import { requireUser } from "../../utils/controller.js";
 import {
   cancelReservationSchema,
   createReservation,
@@ -12,9 +13,7 @@ import {
 
 export const createReservationController: RequestHandler = async (request, response, next) => {
   try {
-    if (!request.user) {
-      return next(new AppError(httpStatus.unauthorized, "UNAUTHORIZED", "Usuario no autenticado"));
-    }
+    const user = requireUser(request);
 
     const parsed = createReservationSchema.safeParse(request.body);
 
@@ -25,7 +24,7 @@ export const createReservationController: RequestHandler = async (request, respo
     }
 
     const reservation = await createReservation({
-      userId: request.user.id,
+      userId: user.id,
       roomScheduleId: parsed.data.roomScheduleId
     });
 
@@ -37,9 +36,7 @@ export const createReservationController: RequestHandler = async (request, respo
 
 export const cancelReservationController: RequestHandler = async (request, response, next) => {
   try {
-    if (!request.user) {
-      return next(new AppError(httpStatus.unauthorized, "UNAUTHORIZED", "Usuario no autenticado"));
-    }
+    const user = requireUser(request);
 
     const parsed = cancelReservationSchema.safeParse(request.params);
 
@@ -50,7 +47,7 @@ export const cancelReservationController: RequestHandler = async (request, respo
     }
 
     const result = await cancelReservation({
-      userId: request.user.id,
+      userId: user.id,
       reservationId: parsed.data.reservationId
     });
 
@@ -62,11 +59,8 @@ export const cancelReservationController: RequestHandler = async (request, respo
 
 export const listMyReservationsController: RequestHandler = async (request, response, next) => {
   try {
-    if (!request.user) {
-      return next(new AppError(httpStatus.unauthorized, "UNAUTHORIZED", "Usuario no autenticado"));
-    }
-
-    const reservations = await listMyReservations(request.user.id);
+    const user = requireUser(request);
+    const reservations = await listMyReservations(user.id);
 
     return sendSuccess(response, httpStatus.ok, reservations, "Reservas del usuario");
   } catch (error) {

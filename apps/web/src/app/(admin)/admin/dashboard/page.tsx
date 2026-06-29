@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { CalendarCheck, DollarSign, ShieldCheck, Users } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import { getDashboardSummary, type DashboardSummary } from "@/services/admin-service";
@@ -68,30 +67,6 @@ function TopList({
   );
 }
 
-function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user } = useAuth();
-
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">
-          <Link href="/login" className="font-semibold text-primary">Inicia sesion</Link> para acceder al panel.
-        </p>
-      </div>
-    );
-  }
-
-  if (user.role !== "Administrador") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Acceso exclusivo para Administradores.</p>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
-
 export default function AdminDashboardPage() {
   const { accessToken } = useAuth();
 
@@ -104,8 +79,7 @@ export default function AdminDashboardPage() {
   const d = summaryQuery.data;
 
   return (
-    <AdminGuard>
-      <main className="px-6 py-10">
+    <main className="px-6 py-10">
         <header className="mb-8">
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -198,6 +172,5 @@ export default function AdminDashboardPage() {
           </>
         ) : null}
       </main>
-    </AdminGuard>
   );
 }

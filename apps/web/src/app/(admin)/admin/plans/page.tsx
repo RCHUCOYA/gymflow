@@ -8,14 +8,14 @@ import { adminListPlans, adminTogglePlanStatus, type AdminMembershipPlan } from 
 type FeedbackState = { tone: "success" | "error"; text: string };
 
 export default function AdminPlansPage() {
-  const { user, accessToken, isAuthenticated } = useAuth();
+  const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
 
   const plansQuery = useQuery<AdminMembershipPlan[]>({
     queryKey: ["admin-plans"],
     queryFn: () => adminListPlans(accessToken ?? ""),
-    enabled: Boolean(accessToken && user?.role === "Administrador")
+    enabled: Boolean(accessToken)
   });
 
   const toggleMutation = useMutation({
@@ -28,14 +28,6 @@ export default function AdminPlansPage() {
       });
     }
   });
-
-  if (!isAuthenticated || !user || user.role !== "Administrador") {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Acceso exclusivo para Administradores.</p>
-      </main>
-    );
-  }
 
   return (
     <main className="px-6 py-10">

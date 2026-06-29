@@ -3,6 +3,7 @@ import { ProfessionalType } from "@prisma/client";
 import { AppError } from "../../utils/app-error.js";
 import { sendSuccess } from "../../utils/api-response.js";
 import { httpStatus } from "../../utils/http-status.js";
+import { parseUuidParam, requireUser } from "../../utils/controller.js";
 import {
   addNutritionPlan,
   addTrainingProgress,
@@ -15,24 +16,6 @@ import {
   nutritionPlanSchema,
   progressSchema
 } from "./professionals.service.js";
-
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function requireUser(request: Parameters<RequestHandler>[0]): NonNullable<typeof request.user> {
-  if (!request.user) {
-    throw new AppError(httpStatus.unauthorized, "UNAUTHORIZED", "Usuario no autenticado");
-  }
-
-  return request.user;
-}
-
-function parseUuidParam(value: unknown, label: string) {
-  if (typeof value !== "string" || !uuidPattern.test(value)) {
-    throw new AppError(httpStatus.badRequest, "VALIDATION_ERROR", `${label} invalido`);
-  }
-
-  return value;
-}
 
 // ─── Listing ─────────────────────────────────────────────────────────────────
 

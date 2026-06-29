@@ -17,7 +17,7 @@ import {
 type FeedbackState = { tone: "success" | "error"; text: string };
 
 export default function AdminPromotionsPage() {
-  const { user, accessToken, isAuthenticated } = useAuth();
+  const { user, accessToken } = useAuth();
   const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -81,14 +81,6 @@ export default function AdminPromotionsPage() {
       setFeedback({ tone: "success", text: "Estado actualizado." });
     }
   });
-
-  if (!isAuthenticated || !user || user.role !== "Administrador") {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Acceso exclusivo para Administradores.</p>
-      </main>
-    );
-  }
 
   return (
     <main className="px-6 py-10">

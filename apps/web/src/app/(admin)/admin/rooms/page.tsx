@@ -8,14 +8,14 @@ import { adminListRooms, adminToggleRoomStatus, type AdminRoom } from "@/service
 type FeedbackState = { tone: "success" | "error"; text: string };
 
 export default function AdminRoomsPage() {
-  const { user, accessToken, isAuthenticated } = useAuth();
+  const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
 
   const roomsQuery = useQuery<AdminRoom[]>({
     queryKey: ["admin-rooms"],
     queryFn: () => adminListRooms(accessToken ?? ""),
-    enabled: Boolean(accessToken && user?.role === "Administrador")
+    enabled: Boolean(accessToken)
   });
 
   const toggleMutation = useMutation({
@@ -28,14 +28,6 @@ export default function AdminRoomsPage() {
       });
     }
   });
-
-  if (!isAuthenticated || !user || user.role !== "Administrador") {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Acceso exclusivo para Administradores.</p>
-      </main>
-    );
-  }
 
   return (
     <main className="px-6 py-10">

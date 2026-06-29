@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { adminListAuditLogs, type AuditLog } from "@/services/admin-service";
 
 export default function AdminAuditPage() {
-  const { user, accessToken, isAuthenticated } = useAuth();
+  const { accessToken } = useAuth();
   const [entityFilter, setEntityFilter] = useState("");
   const [page, setPage] = useState(1);
 
@@ -18,16 +18,8 @@ export default function AdminAuditPage() {
         limit: 25,
         ...(entityFilter ? { entity: entityFilter } : {})
       }),
-    enabled: Boolean(accessToken && user?.role === "Administrador")
+    enabled: Boolean(accessToken)
   });
-
-  if (!isAuthenticated || !user || user.role !== "Administrador") {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Acceso exclusivo para Administradores.</p>
-      </main>
-    );
-  }
 
   const entityOptions = [
     "Product",
