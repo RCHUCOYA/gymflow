@@ -289,6 +289,8 @@ Una funcionalidad se considera terminada cuando cumple:
 
 ## Fase 7. Tienda, carrito, ordenes e inventario
 
+**Estado:** completada.
+
 **Objetivo:** implementar compra de productos con stock controlado.
 
 **Duracion sugerida:** 1 sprint.

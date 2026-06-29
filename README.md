@@ -90,6 +90,7 @@ Este repositorio ya inicio la implementacion siguiendo el roadmap.
 - **Fase 4 - Membresias y pagos simulados:** completada con backend, frontend de compra y renovacion en `/planes`, estado en `/profile` y pruebas de integracion API.
 - **Fase 5 - Salas, horarios y reservas:** completada con backend (`/rooms`, `/rooms/:roomId/schedules`, `/reservations`, `/reservations/me`, `/reservations/:id/cancel`), frontend en `/salas` y `/reservations`, y pruebas de integracion API cubriendo todas las reglas de negocio (membresia activa, cupo, duplicado, cancelacion).
 - **Fase 6 - Profesionales, agendas y seguimiento:** completada con backend (`/trainers`, `/nutritionists`, `/trainers/:id/appointments`, `/nutritionists/:id/appointments`, `/appointments/me`, `/appointments/:id/cancel`, `/staff/appointments`, `/appointments/:id/progress`, `/appointments/:id/nutrition-plan`), frontend en `/entrenadores`, `/nutricionistas`, `/appointments` y `/staff/agenda`, pruebas de integracion cubriendo RN-002, RN-003, RN-021, RN-022, RN-023, RN-024 y RN-031.
+- **Fase 7 - Tienda, carrito, ordenes e inventario:** completada con backend (`/products`, `/cart`, `/cart/items`, `/orders/checkout`, `/orders/me`, `/payments/me`), frontend en `/tienda`, `/cart` y `/orders`, pruebas de integracion cubriendo stock transaccional, carrito, checkout y aislamiento de datos por usuario.
 
 Las fases de autenticacion, RBAC y modulos funcionales continuan segun [docs/16-roadmap.md](docs/16-roadmap.md).
 

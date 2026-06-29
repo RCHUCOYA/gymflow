@@ -4,6 +4,7 @@ import { membershipsRouter } from "../modules/memberships/memberships.routes.js"
 import { professionalsRouter } from "../modules/professionals/professionals.routes.js";
 import { reservationsRouter } from "../modules/reservations/reservations.routes.js";
 import { roomsRouter } from "../modules/rooms/rooms.routes.js";
+import { storeRouter } from "../modules/store/store.routes.js";
 import { usersRouter } from "../modules/users/users.routes.js";
 import { healthRouter } from "./health.routes.js";
 
@@ -16,3 +17,4 @@ apiRouter.use(membershipsRouter);
 apiRouter.use(roomsRouter);
 apiRouter.use(reservationsRouter);
 apiRouter.use(professionalsRouter);
+apiRouter.use(storeRouter);
