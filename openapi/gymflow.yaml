@@ -269,7 +269,8 @@ paths:
   /rooms:
     get:
       tags: [Rooms]
-      summary: Listar salas
+      security: []
+      summary: Listar salas activas
       responses:
         '200':
           description: Salas disponibles
@@ -280,7 +281,8 @@ paths:
   /rooms/{roomId}/schedules:
     get:
       tags: [Rooms]
-      summary: Listar horarios por sala
+      security: []
+      summary: Listar horarios futuros de una sala con cupos disponibles
       parameters:
         - $ref: '#/components/parameters/RoomId'
       responses:
@@ -289,46 +291,79 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoomScheduleItem'
+                  message:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
   /reservations:
     post:
       tags: [Reservations]
-      summary: Reservar sala
+      summary: Crear reserva de sala (requiere membresia activa)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [roomScheduleId]
-              properties:
-                roomScheduleId:
-                  type: string
-                  format: uuid
+              $ref: '#/components/schemas/CreateReservationRequest'
       responses:
         '201':
           description: Reserva creada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ReservationResult'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/BusinessRule'
   /reservations/me:
     get:
       tags: [Reservations]
       summary: Listar mis reservas
       responses:
         '200':
-          description: Reservas del usuario
+          description: Reservas del usuario autenticado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReservationResult'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /reservations/{reservationId}/cancel:
     patch:
       tags: [Reservations]
-      summary: Cancelar reserva
+      summary: Cancelar reserva propia antes del inicio
       parameters:
         - $ref: '#/components/parameters/ReservationId'
       responses:
@@ -338,6 +373,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/BusinessRule'
   /trainers:
     get:
       tags: [Professionals]
@@ -927,6 +970,7 @@ components:
           $ref: '#/components/schemas/PaymentMethod'
     Room:
       type: object
+      required: [id, name, capacity, status]
       properties:
         id:
           type: string
@@ -935,10 +979,13 @@ components:
           type: string
         capacity:
           type: integer
+          minimum: 1
         status:
           type: string
+          enum: [active, inactive]
     RoomsResponse:
       type: object
+      required: [success, data, message]
       properties:
         success:
           type: boolean
@@ -948,6 +995,73 @@ components:
             $ref: '#/components/schemas/Room'
         message:
           type: string
+    RoomScheduleItem:
+      type: object
+      required: [id, roomId, startsAt, endsAt, quota, confirmedCount, availableSlots]
+      properties:
+        id:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        quota:
+          type: integer
+          minimum: 1
+        confirmedCount:
+          type: integer
+          minimum: 0
+        availableSlots:
+          type: integer
+          minimum: 0
+    CreateReservationRequest:
+      type: object
+      required: [roomScheduleId]
+      properties:
+        roomScheduleId:
+          type: string
+          format: uuid
+    ReservationResult:
+      type: object
+      required: [id, status, roomSchedule, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [confirmed, cancelled]
+        roomSchedule:
+          type: object
+          required: [id, startsAt, endsAt, room]
+          properties:
+            id:
+              type: string
+              format: uuid
+            startsAt:
+              type: string
+              format: date-time
+            endsAt:
+              type: string
+              format: date-time
+            room:
+              type: object
+              required: [id, name]
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+        createdAt:
+          type: string
+          format: date-time
     Product:
       type: object
       properties:

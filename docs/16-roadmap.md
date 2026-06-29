@@ -165,7 +165,7 @@ Una funcionalidad se considera terminada cuando cumple:
 
 ## Fase 4. Membresias y pagos simulados
 
-**Estado:** en progreso (backend y frontend inicial implementados, pruebas de modulo pendientes).
+**Estado:** completada.
 
 **Objetivo:** habilitar compra, renovacion y validacion de membresias.
 
@@ -205,6 +205,8 @@ Una funcionalidad se considera terminada cuando cumple:
 - La membresia activa habilita reservas segun reglas de negocio.
 
 ## Fase 5. Salas, horarios y reservas
+
+**Estado:** completada.
 
 **Objetivo:** implementar reservas de salas con control de aforo.
 
