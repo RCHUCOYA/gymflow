@@ -86,7 +86,8 @@ Este repositorio ya inicio la implementacion siguiendo el roadmap.
 
 - **Fase 1 - Fundacion tecnica del monorepo:** completada.
 - **Fase 2 - Base de datos, Prisma y seed:** completada con `schema.prisma`, migracion inicial y seed reproducible.
-- **Fase 3 - Auth, Users y RBAC:** en progreso con backend base operativo (`/auth/*`, `/users/me`, `/users`, `/users/:id/role`) y frontend inicial de sesion/perfil (`/login`, `/register`, `/profile`, `/admin/users`).
+- **Fase 3 - Auth, Users y RBAC:** completada con backend, frontend base y pruebas de integracion.
+- **Fase 4 - Membresias y pagos simulados:** en progreso con backend (`/membership-plans`, `/memberships/purchase`, `/memberships/renew`, `/memberships/me`) y frontend inicial (`/planes`, estado de membresia en `/profile`).
 
 Las fases de autenticacion, RBAC y modulos funcionales continuan segun [docs/16-roadmap.md](docs/16-roadmap.md).
 

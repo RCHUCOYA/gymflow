@@ -1,4 +1,4 @@
-import { PaymentMethod, type Prisma } from "@prisma/client";
+import { PaymentMethod } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../prisma/client.js";
 import { AppError } from "../../utils/app-error.js";
@@ -219,7 +219,7 @@ export async function getMyMembership(userId: string) {
       name: membership.membershipPlan.name,
       durationDays: membership.membershipPlan.durationDays,
       price: Number(membership.membershipPlan.price),
-      benefits: membership.membershipPlan.benefits as Prisma.JsonValue
+      benefits: membership.membershipPlan.benefits
     }
   };
 }

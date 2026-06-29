@@ -121,7 +121,7 @@ Una funcionalidad se considera terminada cuando cumple:
 
 ## Fase 3. Autenticacion, usuarios y RBAC
 
-**Estado:** en progreso (backend implementado, frontend inicial implementado, pruebas pendientes).
+**Estado:** completada.
 
 **Objetivo:** permitir acceso seguro por rol.
 
@@ -164,6 +164,8 @@ Una funcionalidad se considera terminada cuando cumple:
 - Refresh token revocado no renueva sesion.
 
 ## Fase 4. Membresias y pagos simulados
+
+**Estado:** en progreso (backend y frontend inicial implementados, pruebas de modulo pendientes).
 
 **Objetivo:** habilitar compra, renovacion y validacion de membresias.
 
