@@ -1,0 +1,27 @@
+meta {
+  name: Book Nutritionist
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/nutritionists/{{professionalId}}/appointments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "startsAt": "2026-07-02T10:00:00-05:00",
+    "endsAt": "2026-07-02T11:00:00-05:00"
+  }
+}
+

@@ -1,0 +1,16 @@
+meta {
+  name: List Nutritionists
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/nutritionists
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+

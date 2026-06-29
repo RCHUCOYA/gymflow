@@ -1,0 +1,27 @@
+meta {
+  name: Renew Membership
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/memberships/renew
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "membershipPlanId": "{{membershipPlanId}}",
+    "paymentMethod": "Plin"
+  }
+}
+

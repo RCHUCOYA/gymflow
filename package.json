@@ -1,0 +1,42 @@
+{
+  "name": "gymflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GymFlow documentation-first SaaS platform for integral gym management.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev -w @gymflow/api",
+    "dev:web": "npm run dev -w @gymflow/web",
+    "build": "npm run build --workspaces --if-present",
+    "build:api": "npm run build -w @gymflow/api",
+    "build:web": "npm run build -w @gymflow/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test:api": "npm run test -w @gymflow/api",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@types/node": "^20.19.26",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.0.0"
+  }
+}

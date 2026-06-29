@@ -1,0 +1,16 @@
+meta {
+  name: Get My Membership
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/memberships/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+

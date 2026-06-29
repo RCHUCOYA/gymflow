@@ -1,0 +1,27 @@
+meta {
+  name: Purchase Membership
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/memberships/purchase
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "membershipPlanId": "{{membershipPlanId}}",
+    "paymentMethod": "Yape"
+  }
+}
+

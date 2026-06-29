@@ -1,0 +1,431 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EntityStatus {
+  active
+  inactive
+}
+
+enum MembershipStatus {
+  active
+  expired
+  cancelled
+}
+
+enum ReservationStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+}
+
+enum CartStatus {
+  active
+  checked_out
+  abandoned
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  confirmed
+  rejected
+  cancelled
+}
+
+enum PaymentMethod {
+  Visa
+  Mastercard
+  Yape
+  Plin
+  Transferencia
+}
+
+enum ProfessionalType {
+  trainer
+  nutritionist
+}
+
+enum PromotionTargetType {
+  product
+  membership_plan
+}
+
+model Role {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @unique @db.VarChar(60)
+  description String?      @db.VarChar(255)
+  users       User[]
+  permissions Permission[] @relation("RolePermissions")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(120)
+  description String?  @db.VarChar(255)
+  roles       Role[]   @relation("RolePermissions")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("permissions")
+}
+
+model User {
+  id                  String                @id @default(uuid()) @db.Uuid
+  roleId              String                @map("role_id") @db.Uuid
+  firstName           String                @map("first_name") @db.VarChar(80)
+  lastName            String                @map("last_name") @db.VarChar(120)
+  email               String                @unique @db.VarChar(160)
+  passwordHash        String                @map("password_hash") @db.VarChar(255)
+  phone               String?               @db.VarChar(30)
+  birthDate           DateTime?             @map("birth_date") @db.Date
+  avatarUrl           String?               @map("avatar_url") @db.VarChar(500)
+  status              EntityStatus          @default(active)
+  role                Role                  @relation(fields: [roleId], references: [id])
+  memberships         UserMembership[]
+  reservations        Reservation[]
+  appointments        Appointment[]         @relation("ClientAppointments")
+  professionalProfile ProfessionalProfile?
+  carts               Cart[]
+  orders              Order[]
+  payments            Payment[]
+  attendances         Attendance[]
+  auditLogs           AuditLog[]
+  createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([roleId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model MembershipPlan {
+  id              String             @id @default(uuid()) @db.Uuid
+  name            String             @unique @db.VarChar(80)
+  durationDays    Int                @map("duration_days")
+  price           Decimal            @db.Decimal(10, 2)
+  benefits        Json
+  status          EntityStatus       @default(active)
+  userMemberships UserMembership[]
+  promotions      Promotion[]
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status])
+  @@map("membership_plans")
+}
+
+model UserMembership {
+  id               String           @id @default(uuid()) @db.Uuid
+  userId           String           @map("user_id") @db.Uuid
+  membershipPlanId String           @map("membership_plan_id") @db.Uuid
+  startsAt         DateTime         @map("starts_at") @db.Date
+  endsAt           DateTime         @map("ends_at") @db.Date
+  status           MembershipStatus @default(active)
+  user             User             @relation(fields: [userId], references: [id])
+  membershipPlan   MembershipPlan   @relation(fields: [membershipPlanId], references: [id])
+  payments         Payment[]
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId, status])
+  @@index([membershipPlanId])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@map("user_memberships")
+}
+
+model Room {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String         @unique @db.VarChar(100)
+  capacity    Int
+  status      EntityStatus   @default(active)
+  schedules   RoomSchedule[]
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status])
+  @@map("rooms")
+}
+
+model RoomSchedule {
+  id           String        @id @default(uuid()) @db.Uuid
+  roomId       String        @map("room_id") @db.Uuid
+  startsAt     DateTime      @map("starts_at") @db.Timestamptz(6)
+  endsAt       DateTime      @map("ends_at") @db.Timestamptz(6)
+  quota        Int
+  status       EntityStatus  @default(active)
+  room         Room          @relation(fields: [roomId], references: [id])
+  reservations Reservation[]
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([roomId])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@index([status])
+  @@map("room_schedules")
+}
+
+model Reservation {
+  id             String            @id @default(uuid()) @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  roomScheduleId String            @map("room_schedule_id") @db.Uuid
+  status         ReservationStatus @default(confirmed)
+  user           User              @relation(fields: [userId], references: [id])
+  roomSchedule   RoomSchedule      @relation(fields: [roomScheduleId], references: [id])
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([userId, roomScheduleId])
+  @@index([roomScheduleId, status])
+  @@index([userId, status])
+  @@map("reservations")
+}
+
+model ProfessionalProfile {
+  id           String           @id @default(uuid()) @db.Uuid
+  userId       String           @unique @map("user_id") @db.Uuid
+  type         ProfessionalType
+  specialty    String?          @db.VarChar(120)
+  bio          String?
+  status       EntityStatus     @default(active)
+  user         User             @relation(fields: [userId], references: [id])
+  appointments Appointment[]
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([type, status])
+  @@map("professional_profiles")
+}
+
+model Appointment {
+  id                    String              @id @default(uuid()) @db.Uuid
+  clientId              String              @map("client_id") @db.Uuid
+  professionalProfileId String              @map("professional_profile_id") @db.Uuid
+  startsAt              DateTime            @map("starts_at") @db.Timestamptz(6)
+  endsAt                DateTime            @map("ends_at") @db.Timestamptz(6)
+  status                AppointmentStatus   @default(confirmed)
+  client                User                @relation("ClientAppointments", fields: [clientId], references: [id])
+  professionalProfile   ProfessionalProfile @relation(fields: [professionalProfileId], references: [id])
+  trainingProgress      TrainingProgress[]
+  nutritionPlans        NutritionPlan[]
+  createdAt             DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([clientId, startsAt])
+  @@index([professionalProfileId, startsAt, status])
+  @@map("appointments")
+}
+
+model TrainingProgress {
+  id            String      @id @default(uuid()) @db.Uuid
+  appointmentId String      @map("appointment_id") @db.Uuid
+  notes         String
+  metrics       Json?
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([appointmentId])
+  @@map("training_progress")
+}
+
+model NutritionPlan {
+  id            String      @id @default(uuid()) @db.Uuid
+  appointmentId String      @map("appointment_id") @db.Uuid
+  title         String      @db.VarChar(140)
+  description   String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([appointmentId])
+  @@map("nutrition_plans")
+}
+
+model ProductCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(80)
+  description String?  @db.VarChar(255)
+  products    Product[]
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("product_categories")
+}
+
+model Product {
+  id          String          @id @default(uuid()) @db.Uuid
+  categoryId  String          @map("category_id") @db.Uuid
+  name        String          @db.VarChar(140)
+  slug        String          @unique @db.VarChar(160)
+  description String?
+  price       Decimal         @db.Decimal(10, 2)
+  stock       Int
+  imageUrl    String?         @map("image_url") @db.VarChar(500)
+  status      EntityStatus    @default(active)
+  category    ProductCategory @relation(fields: [categoryId], references: [id])
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  promotions  Promotion[]
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("products")
+}
+
+model Cart {
+  id        String     @id @default(uuid()) @db.Uuid
+  userId    String     @map("user_id") @db.Uuid
+  status    CartStatus @default(active)
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId, status])
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  cartId    String   @map("cart_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  quantity  Int
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([cartId, productId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  total     Decimal     @db.Decimal(10, 2)
+  status    OrderStatus @default(pending)
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  payment   Payment?
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId, status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  quantity  Int
+  unitPrice Decimal  @map("unit_price") @db.Decimal(10, 2)
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Payment {
+  id               String          @id @default(uuid()) @db.Uuid
+  userId           String          @map("user_id") @db.Uuid
+  orderId          String?         @unique @map("order_id") @db.Uuid
+  userMembershipId String?         @map("user_membership_id") @db.Uuid
+  method           PaymentMethod
+  amount           Decimal         @db.Decimal(10, 2)
+  status           PaymentStatus   @default(pending)
+  receiptCode      String          @unique @map("receipt_code") @db.VarChar(80)
+  user             User            @relation(fields: [userId], references: [id])
+  order            Order?          @relation(fields: [orderId], references: [id])
+  userMembership   UserMembership? @relation(fields: [userMembershipId], references: [id])
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+model Promotion {
+  id               String              @id @default(uuid()) @db.Uuid
+  name             String              @db.VarChar(120)
+  description      String?             @db.VarChar(255)
+  discountPercent  Decimal             @map("discount_percent") @db.Decimal(5, 2)
+  targetType       PromotionTargetType @map("target_type")
+  productId        String?             @map("product_id") @db.Uuid
+  membershipPlanId String?             @map("membership_plan_id") @db.Uuid
+  startsAt         DateTime            @map("starts_at") @db.Timestamptz(6)
+  endsAt           DateTime            @map("ends_at") @db.Timestamptz(6)
+  status           EntityStatus        @default(active)
+  product          Product?            @relation(fields: [productId], references: [id])
+  membershipPlan   MembershipPlan?     @relation(fields: [membershipPlanId], references: [id])
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([targetType])
+  @@index([startsAt, endsAt])
+  @@index([status])
+  @@map("promotions")
+}
+
+model Attendance {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  checkedAt DateTime @default(now()) @map("checked_at") @db.Timestamptz(6)
+  notes     String?
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([checkedAt])
+  @@map("attendances")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String   @map("actor_user_id") @db.Uuid
+  action      String   @db.VarChar(120)
+  entity      String   @db.VarChar(120)
+  entityId    String?  @map("entity_id") @db.Uuid
+  metadata    Json?
+  actor       User     @relation(fields: [actorUserId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([actorUserId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

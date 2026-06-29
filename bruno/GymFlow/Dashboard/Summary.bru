@@ -1,0 +1,16 @@
+meta {
+  name: Summary
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/dashboard/summary?from=2026-07-01&to=2026-07-31
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+

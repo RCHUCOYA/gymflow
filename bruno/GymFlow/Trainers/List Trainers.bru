@@ -1,0 +1,16 @@
+meta {
+  name: List Trainers
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/trainers
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+

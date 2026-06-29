@@ -1,0 +1,1014 @@
+openapi: 3.1.0
+info:
+  title: GymFlow API
+  version: 1.0.0
+  summary: API REST para la plataforma SaaS de gestion integral de gimnasios GymFlow.
+  description: Contrato documental para autenticacion, usuarios, membresias, reservas, tienda, pagos simulados y dashboard.
+servers:
+  - url: http://localhost:4000/api/v1
+    description: Desarrollo local futuro
+  - url: https://api.gymflow.example.com/api/v1
+    description: Produccion referencial
+tags:
+  - name: System
+  - name: Auth
+  - name: Users
+  - name: Memberships
+  - name: Rooms
+  - name: Reservations
+  - name: Professionals
+  - name: Store
+  - name: Payments
+  - name: Dashboard
+  - name: Admin
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [System]
+      security: []
+      summary: Verificar estado de la API
+      responses:
+        '200':
+          description: API operativa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /auth/register:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Registrar cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Iniciar sesion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Sesion iniciada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Renovar access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token renovado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Cerrar sesion
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '204':
+          description: Sesion cerrada
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Solicitar recuperacion de contrasena
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Solicitud registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Obtener perfil actual
+      responses:
+        '200':
+          description: Perfil actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    patch:
+      tags: [Users]
+      summary: Actualizar perfil actual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /users:
+    get:
+      tags: [Users]
+      summary: Listar usuarios
+      description: Requiere rol Administrador.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Usuarios paginados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsersResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /users/{userId}/role:
+    patch:
+      tags: [Users]
+      summary: Cambiar rol de usuario
+      description: Requiere rol Administrador.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleId]
+              properties:
+                roleId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Rol actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserRoleResponse'
+  /membership-plans:
+    get:
+      tags: [Memberships]
+      security: []
+      summary: Listar planes de membresia
+      responses:
+        '200':
+          description: Planes disponibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipPlansResponse'
+  /memberships/purchase:
+    post:
+      tags: [Memberships]
+      summary: Comprar membresia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseMembershipRequest'
+      responses:
+        '201':
+          description: Membresia comprada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '422':
+          $ref: '#/components/responses/BusinessRule'
+  /memberships/renew:
+    post:
+      tags: [Memberships]
+      summary: Renovar membresia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseMembershipRequest'
+      responses:
+        '201':
+          description: Membresia renovada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /memberships/me:
+    get:
+      tags: [Memberships]
+      summary: Obtener membresia actual
+      responses:
+        '200':
+          description: Membresia actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /rooms:
+    get:
+      tags: [Rooms]
+      summary: Listar salas
+      responses:
+        '200':
+          description: Salas disponibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomsResponse'
+  /rooms/{roomId}/schedules:
+    get:
+      tags: [Rooms]
+      summary: Listar horarios por sala
+      parameters:
+        - $ref: '#/components/parameters/RoomId'
+      responses:
+        '200':
+          description: Horarios disponibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /reservations:
+    post:
+      tags: [Reservations]
+      summary: Reservar sala
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roomScheduleId]
+              properties:
+                roomScheduleId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Reserva creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /reservations/me:
+    get:
+      tags: [Reservations]
+      summary: Listar mis reservas
+      responses:
+        '200':
+          description: Reservas del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /reservations/{reservationId}/cancel:
+    patch:
+      tags: [Reservations]
+      summary: Cancelar reserva
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      responses:
+        '200':
+          description: Reserva cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /trainers:
+    get:
+      tags: [Professionals]
+      summary: Listar entrenadores
+      responses:
+        '200':
+          description: Entrenadores disponibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /trainers/{professionalId}/appointments:
+    post:
+      tags: [Professionals]
+      summary: Reservar entrenador
+      parameters:
+        - $ref: '#/components/parameters/ProfessionalId'
+      requestBody:
+        $ref: '#/components/requestBodies/AppointmentRequest'
+      responses:
+        '201':
+          description: Cita creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /nutritionists:
+    get:
+      tags: [Professionals]
+      summary: Listar nutricionistas
+      responses:
+        '200':
+          description: Nutricionistas disponibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /nutritionists/{professionalId}/appointments:
+    post:
+      tags: [Professionals]
+      summary: Reservar nutricionista
+      parameters:
+        - $ref: '#/components/parameters/ProfessionalId'
+      requestBody:
+        $ref: '#/components/requestBodies/AppointmentRequest'
+      responses:
+        '201':
+          description: Cita creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /products:
+    get:
+      tags: [Store]
+      security: []
+      summary: Listar productos
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Productos paginados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+  /cart:
+    get:
+      tags: [Store]
+      summary: Obtener carrito
+      responses:
+        '200':
+          description: Carrito actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /cart/items:
+    post:
+      tags: [Store]
+      summary: Agregar item al carrito
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, quantity]
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+                quantity:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Item agregado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /cart/items/{cartItemId}:
+    patch:
+      tags: [Store]
+      summary: Actualizar cantidad de item del carrito
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity:
+                  type: integer
+                  minimum: 1
+      responses:
+        '200':
+          description: Item actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags: [Store]
+      summary: Eliminar item del carrito
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      responses:
+        '204':
+          description: Item eliminado
+  /orders/checkout:
+    post:
+      tags: [Store]
+      summary: Confirmar compra
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentMethod]
+              properties:
+                paymentMethod:
+                  $ref: '#/components/schemas/PaymentMethod'
+      responses:
+        '201':
+          description: Orden confirmada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /orders/me:
+    get:
+      tags: [Store]
+      summary: Mis ordenes
+      responses:
+        '200':
+          description: Historial de ordenes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /payments/me:
+    get:
+      tags: [Payments]
+      summary: Mis pagos
+      responses:
+        '200':
+          description: Historial de pagos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Resumen administrativo
+      description: Requiere rol Administrador.
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: KPIs del dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+    RoomId:
+      name: roomId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ReservationId:
+      name: reservationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProfessionalId:
+      name: professionalId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CartItemId:
+      name: cartItemId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  requestBodies:
+    AppointmentRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [startsAt, endsAt]
+            properties:
+              startsAt:
+                type: string
+                format: date-time
+              endsAt:
+                type: string
+                format: date-time
+  responses:
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Sin permisos para la accion solicitada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflicto de negocio o duplicidad
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BusinessRule:
+      description: Regla de negocio incumplida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    SuccessResponse:
+      type: object
+      required: [success, data, message]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+        message:
+          type: string
+    HealthResponse:
+      type: object
+      required: [success, data, message]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [service, status, environment, uptimeSeconds]
+          properties:
+            service:
+              type: string
+              example: gymflow-api
+            status:
+              type: string
+              example: ok
+            environment:
+              type: string
+              example: development
+            uptimeSeconds:
+              type: integer
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+    RegisterRequest:
+      type: object
+      required: [firstName, lastName, email, password]
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+        lastName:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        phone:
+          type: string
+        birthDate:
+          type: string
+          format: date
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      required: [success, data, message]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [user, accessToken, refreshToken]
+          properties:
+            user:
+              $ref: '#/components/schemas/AuthUser'
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+        message:
+          type: string
+    RefreshResponse:
+      type: object
+      required: [success, data, message]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [accessToken, refreshToken]
+          properties:
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+        message:
+          type: string
+    AuthUser:
+      type: object
+      required: [id, firstName, lastName, email, role, permissions]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [Administrador, Recepcionista, Cliente, Entrenador, Nutricionista]
+        permissions:
+          type: array
+          items:
+            type: string
+    User:
+      type: object
+      required: [id, firstName, lastName, email, role, status, permissions]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: object
+          required: [id, name]
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              enum: [Administrador, Recepcionista, Cliente, Entrenador, Nutricionista]
+        permissions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    UserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/User'
+        message:
+          type: string
+    PaginatedUsersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+        message:
+          type: string
+    UpdateUserRoleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          required: [id, role]
+          properties:
+            id:
+              type: string
+              format: uuid
+            role:
+              type: object
+              required: [id, name]
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                  enum: [Administrador, Recepcionista, Cliente, Entrenador, Nutricionista]
+        message:
+          type: string
+    UpdateProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+    MembershipPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        durationDays:
+          type: integer
+        price:
+          type: number
+        benefits:
+          type: object
+    MembershipPlansResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipPlan'
+        message:
+          type: string
+    PurchaseMembershipRequest:
+      type: object
+      required: [membershipPlanId, paymentMethod]
+      properties:
+        membershipPlanId:
+          type: string
+          format: uuid
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        capacity:
+          type: integer
+        status:
+          type: string
+    RoomsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Room'
+        message:
+          type: string
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+    ProductsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+        message:
+          type: string
+    DashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            totalRevenue:
+              type: number
+            activeMemberships:
+              type: integer
+            reservations:
+              type: integer
+            topProducts:
+              type: array
+              items:
+                type: object
+        message:
+          type: string
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    PaymentMethod:
+      type: string
+      enum: [Visa, Mastercard, Yape, Plin, Transferencia]
