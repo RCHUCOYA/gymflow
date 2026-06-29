@@ -1,0 +1,15 @@
+meta {
+  name: My Appointments
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/appointments/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

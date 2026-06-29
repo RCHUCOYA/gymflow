@@ -384,55 +384,218 @@ paths:
   /trainers:
     get:
       tags: [Professionals]
-      summary: Listar entrenadores
+      security: []
+      summary: Listar entrenadores activos
       responses:
         '200':
           description: Entrenadores disponibles
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProfessionalProfile'
+                  message:
+                    type: string
   /trainers/{professionalId}/appointments:
     post:
       tags: [Professionals]
-      summary: Reservar entrenador
+      summary: Reservar sesion con entrenador (requiere beneficio trainer en membresia)
       parameters:
         - $ref: '#/components/parameters/ProfessionalId'
       requestBody:
         $ref: '#/components/requestBodies/AppointmentRequest'
       responses:
         '201':
-          description: Cita creada
+          description: Cita con entrenador creada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AppointmentResult'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/BusinessRule'
   /nutritionists:
     get:
       tags: [Professionals]
-      summary: Listar nutricionistas
+      security: []
+      summary: Listar nutricionistas activos
       responses:
         '200':
           description: Nutricionistas disponibles
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProfessionalProfile'
+                  message:
+                    type: string
   /nutritionists/{professionalId}/appointments:
     post:
       tags: [Professionals]
-      summary: Reservar nutricionista
+      summary: Reservar consulta con nutricionista (requiere plan Premium o VIP)
       parameters:
         - $ref: '#/components/parameters/ProfessionalId'
       requestBody:
         $ref: '#/components/requestBodies/AppointmentRequest'
       responses:
         '201':
-          description: Cita creada
+          description: Cita con nutricionista creada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AppointmentResult'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/BusinessRule'
+  /appointments/me:
+    get:
+      tags: [Professionals]
+      summary: Listar mis citas como cliente
+      responses:
+        '200':
+          description: Citas del cliente autenticado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data, message]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AppointmentResult'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /appointments/{appointmentId}/cancel:
+    patch:
+      tags: [Professionals]
+      summary: Cancelar cita propia antes del inicio
+      parameters:
+        - $ref: '#/components/parameters/AppointmentId'
+      responses:
+        '200':
+          description: Cita cancelada
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/BusinessRule'
+  /staff/appointments:
+    get:
+      tags: [Professionals]
+      summary: Listar agenda del profesional autenticado (Entrenador o Nutricionista)
+      responses:
+        '200':
+          description: Agenda del profesional
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /appointments/{appointmentId}/progress:
+    post:
+      tags: [Professionals]
+      summary: Registrar progreso de entrenamiento (solo Entrenador — RN-023)
+      parameters:
+        - $ref: '#/components/parameters/AppointmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainingProgressRequest'
+      responses:
+        '201':
+          description: Progreso registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /appointments/{appointmentId}/nutrition-plan:
+    post:
+      tags: [Professionals]
+      summary: Registrar plan nutricional (solo Nutricionista — RN-024)
+      parameters:
+        - $ref: '#/components/parameters/AppointmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NutritionPlanRequest'
+      responses:
+        '201':
+          description: Plan nutricional registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /products:
     get:
       tags: [Store]
@@ -626,6 +789,13 @@ components:
         format: uuid
     ProfessionalId:
       name: professionalId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AppointmentId:
+      name: appointmentId
       in: path
       required: true
       schema:
@@ -1126,3 +1296,96 @@ components:
     PaymentMethod:
       type: string
       enum: [Visa, Mastercard, Yape, Plin, Transferencia]
+    ProfessionalProfile:
+      type: object
+      required: [id, type, user]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [trainer, nutritionist]
+        specialty:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        user:
+          type: object
+          required: [id, firstName, lastName]
+          properties:
+            id:
+              type: string
+              format: uuid
+            firstName:
+              type: string
+            lastName:
+              type: string
+            avatarUrl:
+              type: string
+              format: uri
+              nullable: true
+    AppointmentResult:
+      type: object
+      required: [id, status, startsAt, endsAt, professional, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [confirmed, cancelled, completed]
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        professional:
+          type: object
+          required: [id, type, user]
+          properties:
+            id:
+              type: string
+              format: uuid
+            type:
+              type: string
+            user:
+              type: object
+              required: [id, firstName, lastName]
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+        createdAt:
+          type: string
+          format: date-time
+    TrainingProgressRequest:
+      type: object
+      required: [notes]
+      properties:
+        notes:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        metrics:
+          type: object
+          additionalProperties: true
+    NutritionPlanRequest:
+      type: object
+      required: [title, description]
+      properties:
+        title:
+          type: string
+          minLength: 2
+          maxLength: 140
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000

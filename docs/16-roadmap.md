@@ -249,6 +249,8 @@ Una funcionalidad se considera terminada cuando cumple:
 
 ## Fase 6. Profesionales, agendas y seguimiento
 
+**Estado:** completada.
+
 **Objetivo:** implementar entrenadores, nutricionistas y citas.
 
 **Duracion sugerida:** 1 sprint.

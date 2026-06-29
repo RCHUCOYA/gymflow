@@ -1,0 +1,30 @@
+meta {
+  name: Add Training Progress
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/appointments/{{appointmentId}}/progress
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "notes": "Buen desempeno en sentadillas. Aumentar peso la proxima sesion.",
+    "metrics": {
+      "weight": 75,
+      "reps": 12,
+      "sets": 4
+    }
+  }
+}

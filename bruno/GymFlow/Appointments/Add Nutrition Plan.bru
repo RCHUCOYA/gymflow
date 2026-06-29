@@ -1,0 +1,26 @@
+meta {
+  name: Add Nutrition Plan
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/appointments/{{appointmentId}}/nutrition-plan
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Plan de ganancia muscular",
+    "description": "Dieta hiperproteica con 2.2g de proteina por kg de peso. Distribuir en 5 comidas diarias."
+  }
+}

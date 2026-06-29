@@ -108,7 +108,7 @@ void test("cliente no puede acceder a endpoint admin", async () => {
 });
 
 void test("cambio de rol solo por administrador", async () => {
-  const [adminLogin, clientLogin, clienteRole, targetUser] = await Promise.all([
+  const [adminLogin, clientLogin, clienteRole, trainerRole, targetUser] = await Promise.all([
     request(app).post("/api/v1/auth/login").send({
       email: "admin@gymflow.dev",
       password: "Password123"
@@ -118,10 +118,12 @@ void test("cambio de rol solo por administrador", async () => {
       password: "Password123"
     }),
     prisma.role.findUnique({ where: { name: "Cliente" } }),
+    prisma.role.findUnique({ where: { name: "Entrenador" } }),
     prisma.user.findUnique({ where: { email: "trainer@gymflow.dev" } })
   ]);
 
   assert.ok(clienteRole?.id);
+  assert.ok(trainerRole?.id);
   assert.ok(targetUser?.id);
 
   const clientToken = bodyOf<AuthResponseBody>(clientLogin).data.accessToken;
@@ -142,6 +144,12 @@ void test("cambio de rol solo por administrador", async () => {
 
   assert.equal(allowed.status, 200);
   assert.equal(allowedBody.success, true);
+
+  // Restore trainer role so subsequent test files are not affected
+  await prisma.user.update({
+    where: { id: targetUser.id },
+    data: { roleId: trainerRole.id }
+  });
 });
 
 void test("refresh token revocado no renueva sesion", async () => {
